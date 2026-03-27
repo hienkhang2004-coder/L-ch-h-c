@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<script>
+(function () {
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = "/index.mobile.html";
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lịch Học — 2022KTT</title>
@@ -48,6 +56,16 @@
 }
 [data-theme="dark"] nav { background:rgba(26,24,22,0.9); }
 [data-theme="dark"] .bottom-nav { background:rgba(26,24,22,0.92); }
+
+/* Dark mode: fix accent text colors for readability */
+[data-theme="dark"] .a1 .cb-name { color:#e88a6a; }
+[data-theme="dark"] .a2 .cb-name { color:#c8a87a; }
+[data-theme="dark"] .a3 .cb-name { color:#7ac0a8; }
+[data-theme="dark"] .a4 .cb-name { color:#9a9acc; }
+[data-theme="dark"] .a5 .cb-name { color:#d0a040; }
+[data-theme="dark"] .a6 .cb-name { color:#c87aa0; }
+[data-theme="dark"] .a7 .cb-name { color:#5ab0c8; }
+[data-theme="dark"] .dc-card .dc-name { color:var(--on-surface); }
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior: smooth; }
@@ -690,260 +708,75 @@ nav {
 }
 .m-row {
   display:flex; justify-content:space-between; align-items:baseline;
-  padding:0.85rem 0; border-bottom:1px solid var(--line); gap:1rem;
-}
-.m-row:last-child { border-bottom:none; }
-.m-row .ml {
-  font-family:var(--font-l); font-size:0.6rem; letter-spacing:0.1em;
-  text-transform:uppercase; color:var(--muted); font-weight:600; flex-shrink:0;
-}
-.m-row .mv {
-  font-family:var(--font-b); font-size:0.82rem; font-weight:500;
-  color:var(--on-surface); text-align:right;
-}
+  padding:0.85rem 0; b
+�─── */
+  .week-nav { flex-wrap:wrap; gap:0.35rem; margin-bottom:0.8rem; }
+  .wn-label { flex-basis:100%; order:-1; text-align:center; font-size:0.65rem; margin-bottom:0.2rem; }
+  .wbtn { flex:1; text-align:center; padding:0.45rem 0.3rem; font-size:0.52rem; }
+  .wbtn-solid { flex:1; text-align:center; padding:0.45rem 0.5rem; font-size:0.52rem; }
 
-/* ── FOOTER ────────────────────────────────────────────────────────────── */
-footer {
-  background:var(--surface-xlow); padding:4rem 3rem 3rem;
-  border-top:1px solid var(--line);
-}
-.ft-inner {
-  max-width:1200px; margin:0 auto;
-  display:flex; justify-content:space-between; align-items:flex-end;
-  flex-wrap:wrap; gap:2rem;
-}
-.ft-left h4 {
-  font-family:var(--font-d); font-size:2rem; font-weight:300;
-  letter-spacing:-0.03em; color:var(--on-surface); margin-bottom:0.4rem;
-}
-.ft-left h4 em { font-style:italic; color:var(--primary); }
-.ft-left p {
-  font-family:var(--font-l); font-size:0.62rem; letter-spacing:0.1em;
-  text-transform:uppercase; color:var(--muted); font-weight:500;
-}
-.ft-right {
-  font-family:var(--font-l); font-size:0.62rem; letter-spacing:0.08em;
-  text-transform:uppercase; color:var(--muted); text-align:right;
-  line-height:1.9; font-weight:500;
-}
-
-/* ── BOTTOM NAV (mobile) ───────────────────────────────────────────────── */
-.bottom-nav {
-  display:none; position:fixed; bottom:0; left:0; right:0; z-index:250;
-  background:rgba(254,249,241,0.92);
-  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom,0);
-}
-.bn-inner {
-  display:flex; justify-content:space-around; align-items:center;
-  max-width:500px; margin:0 auto; height:60px;
-}
-.bn-tab {
-  display:flex; flex-direction:column; align-items:center; gap:3px;
-  background:none; border:none; cursor:pointer; padding:6px 12px;
-  text-decoration:none; -webkit-tap-highlight-color:transparent;
-  transition:color 0.2s;
-}
-.bn-tab svg { width:22px; height:22px; fill:var(--muted); transition:fill 0.2s; }
-.bn-tab span {
-  font-family:var(--font-l); font-size:0.55rem; font-weight:600;
-  letter-spacing:0.06em; text-transform:uppercase; color:var(--muted);
-  transition:color 0.2s;
-}
-.bn-tab.active svg { fill:var(--primary); }
-.bn-tab.active span { color:var(--primary); }
-
-/* ── MOBILE DAY LIST VIEW ─────────────────────────────────────────────── */
-.mobile-tt { display:none; margin-bottom:4rem; }
-.day-tabs {
-  display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;
-  border-bottom:1px solid var(--line); margin-bottom:1.5rem;
-  scrollbar-width:none;
-}
-.day-tabs::-webkit-scrollbar { display:none; }
-.day-tab {
-  flex-shrink:0; background:none; border:none; cursor:pointer;
-  padding:0.75rem 1rem; font-family:var(--font-l); font-size:0.68rem;
-  font-weight:600; letter-spacing:0.08em; text-transform:uppercase;
-  color:var(--muted); position:relative; transition:color 0.2s;
-  -webkit-tap-highlight-color:transparent; min-height:44px;
-  display:flex; flex-direction:column; align-items:center; gap:2px;
-}
-.day-tab .dt-num {
-  font-size:0.9rem; font-weight:700; color:var(--on-surface); line-height:1;
-}
-.day-tab::after {
-  content:''; position:absolute; bottom:0; left:0.5rem; right:0.5rem;
-  height:2px; background:var(--primary); transform:scaleX(0); transition:transform 0.2s;
-}
-.day-tab.active { color:var(--primary); }
-.day-tab.active .dt-num { color:var(--primary); }
-.day-tab.active::after { transform:scaleX(1); }
-.day-tab.is-today { background:rgba(152,53,20,0.06); border-radius:8px 8px 0 0; }
-
-.day-classes { display:flex; flex-direction:column; gap:0.75rem; }
-.dc-card {
-  background:var(--surface-low); border-left:3px solid var(--muted);
-  padding:1rem 1.2rem; cursor:pointer;
-  transition:box-shadow 0.18s, background 0.18s;
-  -webkit-tap-highlight-color:transparent;
-}
-.dc-card:active { background:var(--surface-xlow); }
-.dc-header { display:flex; justify-content:space-between; align-items:flex-start; gap:0.75rem; margin-bottom:0.5rem; }
-.dc-name {
-  font-family:var(--font-b); font-size:0.85rem; font-weight:600;
-  line-height:1.3; color:var(--on-surface); flex:1;
-}
-.dc-period {
-  font-family:var(--font-l); font-size:0.6rem; font-weight:700;
-  letter-spacing:0.08em; color:var(--primary); white-space:nowrap;
-  background:rgba(152,53,20,0.08); padding:0.25rem 0.6rem;
-  text-transform:uppercase; flex-shrink:0;
-}
-.dc-meta {
-  display:flex; gap:1.5rem; flex-wrap:wrap;
-}
-.dc-meta-item {
-  display:flex; align-items:center; gap:0.35rem;
-}
-.dc-meta-item svg { width:14px; height:14px; fill:var(--muted); flex-shrink:0; }
-.dc-meta-item span {
-  font-family:var(--font-l); font-size:0.65rem; color:var(--muted);
-  font-weight:500; letter-spacing:0.04em;
-}
-.dc-empty {
-  text-align:center; padding:3rem 1rem;
-  font-family:var(--font-b); font-size:0.85rem; color:var(--muted);
-}
-.dc-empty-icon { font-size:2rem; margin-bottom:0.5rem; display:block; }
-
-.dc-card.a1{border-left-color:#983514;}
-.dc-card.a2{border-left-color:#7a6547;}
-.dc-card.a3{border-left-color:#4a7c6b;}
-.dc-card.a4{border-left-color:#5a5a8a;}
-.dc-card.a5{border-left-color:#8a6020;}
-.dc-card.a6{border-left-color:#7a4060;}
-.dc-card.a7{border-left-color:#2a6a7a;}
-
-/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
-@media(max-width:768px){
-  body { padding-bottom:70px; }
-  
-  /* Nav */
-  .nav-inner { padding:0 1rem; height:50px; }
-  .nav-links { display:none; }
-  .nav-brand { font-size:0.95rem; }
-  .nc-time { font-size:0.85rem; }
-  .nc-date { font-size:0.5rem; }
-  .nav-clock { min-width:70px; }
-  .install-btn { padding:0.4rem 0.8rem; font-size:0.55rem; }
-  .install-btn svg { width:12px; height:12px; }
-  
-  /* Bottom Nav */
-  .bottom-nav { display:block; }
-  
-  /* Hero */
-  .hero { min-height:auto; padding-top:50px; }
-  .hero-ghost { display:none; }
-  .hero-inner { padding:3rem 1.25rem 2.5rem; }
-  .hero-eyebrow { font-size:0.55rem; margin-bottom:1rem; letter-spacing:0.15em; }
-  .hero-eyebrow::before { width:1.5rem; }
-  .hero-title { font-size:clamp(2.2rem,10vw,3.5rem); margin-bottom:1.5rem; }
-  .hero-stats {
-    display:grid; grid-template-columns:1fr 1fr; gap:1rem 2rem;
-  }
-  .hs-label { font-size:0.52rem; }
-  .hs-value { font-size:0.82rem; }
-  
-  /* Today Strip */
-  .today-strip { padding:1.5rem 0; }
-  .ts-inner { grid-template-columns:1fr; padding:0 1.25rem; gap:1.25rem; }
-  .ts-block.clock-center { order:-1; padding-bottom:1.25rem; border-bottom:1px solid var(--line); }
-  .d-clock { font-size:clamp(2rem,8vw,3rem); }
-  .ts-value { font-size:1.15rem; }
-  .ts-right { text-align:left; }
-  .ts-sub { font-size:0.72rem; }
-  
-  /* Container */
-  .wrap { padding:0 1.25rem; }
-  .section-gap { margin-top:3rem; }
-  
-  /* Section Head */
-  .sec-head { gap:1rem; padding-bottom:1rem; margin-bottom:1.5rem; }
-  .sec-title { font-size:2rem; }
-  .sec-kicker { font-size:0.55rem; }
-  
-  /* Week Nav */
-  .week-nav {
-    flex-wrap:wrap; gap:0.5rem; margin-bottom:1.25rem;
-  }
-  .wn-label { font-size:0.7rem; text-align:center; flex-basis:100%; order:-1; }
-  .wbtn { padding:0.6rem 0.8rem; font-size:0.6rem; min-height:44px; flex:1; text-align:center; }
-  .wbtn-solid { padding:0.6rem 1rem; font-size:0.58rem; min-height:44px; flex:1; text-align:center; }
-  
-  /* Timetable: hide table, show list */
+  /* ── Timetable: hide table, show mobile cards ── */
   .tt-wrap { display:none; }
-  .mobile-tt { display:block; }
-  
-  /* Month calendar mobile */
-  .cal-day { min-height:54px; padding:0.3rem; }
-  .cd-num { font-size:0.65rem; }
+  .mob-daylist { display:block; }
+
+  /* ── Month Calendar ────────────────────────── */
+  .cal-day { min-height:44px; padding:0.2rem; }
+  .cd-num { font-size:0.58rem; }
   .cd-class { display:none; }
-  .month-title { font-size:1.2rem; }
-  
-  /* Subjects */
-  .subjects-grid { grid-template-columns:1fr; border-left:none; }
-  .sc { padding:1.5rem 1.25rem 1.25rem; border-left:none; }
-  .sc-name { font-size:1.1rem; }
-  
-  /* Reminders */
-  .rem-list { margin-bottom:4rem; }
-  .rem-item { gap:1rem; padding:1.25rem 0; flex-wrap:wrap; }
-  .ri-no { min-width:22px; font-size:0.55rem; }
-  .ri-title { font-size:0.82rem; }
-  .ri-sub { font-size:0.7rem; }
-  .ri-tag { font-size:0.55rem; padding:0.25rem 0.6rem; }
-  
-  /* Modal: full screen */
-  .m-overlay { align-items:flex-end; }
-  .m-box {
-    max-width:100%; width:100%; max-height:85vh;
-    padding:2rem 1.5rem 2.5rem;
-    border-radius:16px 16px 0 0;
-    overflow-y:auto; -webkit-overflow-scrolling:touch;
-    animation:mSlideUp 0.28s ease;
+  .cd-dot { width:4px; height:4px; }
+  .month-title { font-size:1rem; }
+  .month-nav { margin-bottom:0.6rem; }
+  .mbtn { font-size:0.55rem; padding:0.35rem 0.5rem; }
+  .cal-head { font-size:0.5rem; padding:0.35rem 0.15rem; }
+
+  /* ── Subjects ──────────────────────────────── */
+  .subjects-grid { grid-template-columns:1fr; }
+  .sc { padding:1rem; }
+  .sc-name { font-size:0.95rem; }
+  .sc-row .rl { font-size:0.5rem; min-width:48px; }
+  .sc-row .rv { font-size:0.68rem; }
+
+  /* ── Action Buttons ────────────────────────── */
+  .action-btns { flex-direction:column; gap:0.3rem; }
+  .act-btn { width:100%; justify-content:center; font-size:0.52rem; padding:0.45rem 0.6rem; }
+
+  /* ── Shared Panel ──────────────────────────── */
+  .shared-panel { padding:0.8rem; }
+
+  /* ── Reminders ─────────────────────────────── */
+  .rem-item { gap:0.7rem; padding:0.9rem 0; }
+  .ri-no { font-size:0.5rem; min-width:18px; }
+  .ri-title { font-size:0.75rem; }
+  .ri-sub { font-size:0.65rem; }
+  .ri-tag { font-size:0.5rem; padding:0.2rem 0.45rem; }
+
+  /* ── Modal ─────────────────────────────────── */
+  .m-overlay {
+    backdrop-filter:none; -webkit-backdrop-filter:none;
   }
-  @keyframes mSlideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-  .m-close { top:1rem; right:1.5rem; font-size:0.7rem; min-height:44px; min-width:44px;
-    display:flex; align-items:center; justify-content:center; }
-  .m-title { font-size:1.4rem; margin-bottom:1.5rem; }
-  .m-row { padding:0.7rem 0; }
-  .m-row .ml { font-size:0.55rem; }
-  .m-row .mv { font-size:0.76rem; }
-  
-  /* Footer */
-  footer { padding:2.5rem 1.25rem 5rem; }
-  .ft-inner { flex-direction:column; align-items:flex-start; }
-  .ft-left h4 { font-size:1.5rem; }
+  .m-box { max-width:96%; padding:1.5rem 1.2rem; }
+  .m-title { font-size:1.2rem; }
+  .m-row .ml { font-size:0.5rem; }
+  .m-row .mv { font-size:0.68rem; word-break:break-word; }
+  .att-row { flex-wrap:wrap; gap:0.25rem; }
+  .att-btn { font-size:0.48rem; padding:0.28rem 0.45rem; }
+  .att-stats { flex-basis:100%; text-align:center; margin-left:0; margin-top:0.15rem; font-size:0.48rem; }
+  .note-textarea { font-size:0.68rem; }
+
+  /* ── Footer ────────────────────────────────── */
+  footer { padding:1.5rem 1.2rem 5rem; }
+  .ft-inner { flex-direction:column; align-items:flex-start; gap:0.8rem; }
+  .ft-left h4 { font-size:1.2rem; }
   .ft-right { text-align:left; }
-  
-  /* Install Banner above bottom nav */
-  .install-banner { bottom:60px; padding:1rem 1.25rem; }
-  .ib-inner { gap:1rem; }
-  .ib-icon { width:34px; height:34px; border-radius:8px; }
-  .ib-icon svg { width:18px; height:18px; }
-  .ib-info h4 { font-size:0.78rem; }
-  .ib-info p { font-size:0.55rem; }
+
+  /* ── Install Banner ────────────────────────── */
+  .install-banner { bottom:58px; padding:0.7rem 0.8rem; }
+  .ib-icon { width:28px; height:28px; }
+  .ib-icon svg { width:14px; height:14px; }
+  .ib-info h4 { font-size:0.68rem; }
+  .ib-info p { font-size:0.48rem; }
 }
 
-@media(max-width:380px){
-  .hero-title { font-size:2rem; }
-  .hero-stats { gap:0.75rem 1.5rem; }
-  .d-clock { font-size:2rem; }
-  .sec-title { font-size:1.6rem; }
-  .day-tab { padding:0.6rem 0.7rem; font-size:0.6rem; }
-}
 </style>
 </head>
 <body>
@@ -1057,7 +890,7 @@ footer {
         <tbody id="tt-body"></tbody>
       </table>
     </div>
-    <div class="mobile-tt" id="mobile-tt"></div>
+
   </div>
   <!-- MONTH VIEW -->
   <div class="month-wrap" id="month-view">
@@ -1143,27 +976,7 @@ footer {
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav" id="bottomNav">
-  <div class="bn-inner">
-    <a class="bn-tab active" href="#" data-target="today" onclick="scrollToSection(event,'today')">
-      <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-      <span>Hôm nay</span>
-    </a>
-    <a class="bn-tab" href="#thoikhoa" data-target="thoikhoa" onclick="scrollToSection(event,'thoikhoa')">
-      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
-      <span>Lịch</span>
-    </a>
-    <a class="bn-tab" href="#hocphan" data-target="hocphan" onclick="scrollToSection(event,'hocphan')">
-      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
-      <span>Học phần</span>
-    </a>
-    <a class="bn-tab" href="#nhacnho" data-target="nhacnho" onclick="scrollToSection(event,'nhacnho')">
-      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-      <span>Nhắc nhở</span>
-    </a>
-  </div>
-</nav>
+
 
 <script>
 /* DATA */
