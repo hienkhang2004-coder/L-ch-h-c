@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lịch Học — 2022KTT</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#983514">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lịch Học">
+<link rel="apple-touch-icon" href="./icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -54,6 +60,62 @@ nav {
   color: var(--on-surface); text-decoration:none; white-space:nowrap;
 }
 .nav-brand em { font-style:italic; color:var(--primary); }
+
+.install-btn {
+  display:none; align-items:center; gap:0.5rem;
+  font-family:var(--font-l); font-size:0.62rem; letter-spacing:0.1em;
+  text-transform:uppercase; font-weight:700; color:var(--on-primary);
+  background:var(--primary); border:none; cursor:pointer;
+  padding:0.5rem 1.2rem; transition:background 0.18s, transform 0.18s;
+  white-space:nowrap;
+}
+.install-btn:hover { background:var(--primary-alt); transform:translateY(-1px); }
+.install-btn svg { width:14px; height:14px; fill:currentColor; flex-shrink:0; }
+.install-btn.show { display:flex; }
+
+/* Install Banner */
+.install-banner {
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:300;
+  background:var(--on-surface); color:var(--surface);
+  padding:1.2rem 2rem;
+  animation:bannerSlide 0.35s ease;
+}
+@keyframes bannerSlide { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.ib-inner {
+  max-width:1200px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap;
+}
+.ib-text {
+  display:flex; align-items:center; gap:1rem; flex:1;
+}
+.ib-icon {
+  width:40px; height:40px; background:var(--primary); border-radius:10px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ib-icon svg { width:22px; height:22px; fill:var(--on-primary); }
+.ib-info h4 {
+  font-family:var(--font-b); font-size:0.85rem; font-weight:600; color:var(--surface);
+}
+.ib-info p {
+  font-family:var(--font-l); font-size:0.62rem; letter-spacing:0.08em;
+  color:var(--muted-light); margin-top:0.15rem;
+}
+.ib-actions { display:flex; gap:0.75rem; align-items:center; }
+.ib-install {
+  font-family:var(--font-l); font-size:0.62rem; letter-spacing:0.12em;
+  text-transform:uppercase; font-weight:700; color:var(--on-primary);
+  background:var(--primary); border:none; cursor:pointer;
+  padding:0.6rem 1.6rem; transition:background 0.18s;
+}
+.ib-install:hover { background:var(--primary-alt); }
+.ib-dismiss {
+  font-family:var(--font-l); font-size:0.62rem; letter-spacing:0.1em;
+  text-transform:uppercase; font-weight:600; color:var(--muted-light);
+  background:none; border:none; cursor:pointer; padding:0.6rem 0.8rem;
+  transition:color 0.18s;
+}
+.ib-dismiss:hover { color:var(--surface); }
+.install-banner.show { display:block; }
 
 .nav-links { display:flex; gap:2.5rem; list-style:none; }
 .nav-links a {
@@ -443,6 +505,10 @@ footer {
       <li><a href="#hocphan">Học phần</a></li>
       <li><a href="#nhacnho">Nhắc nhở</a></li>
     </ul>
+    <button class="install-btn" id="installBtn" onclick="installApp()">
+      <svg viewBox="0 0 24 24"><path d="M13 5v6h1.17L12 13.17 9.83 11H11V5h2m2-2H9v6H5l7 7 7-7h-4V3zm4 15H5v2h14v-2z"/></svg>
+      Cài App
+    </button>
     <div class="nav-clock">
       <span class="nc-time" id="nav-time">00:00:00</span>
       <span class="nc-date" id="nav-date">—</span>
@@ -569,6 +635,25 @@ footer {
     <div class="m-eyebrow">Chi tiết học phần</div>
     <h3 class="m-title" id="m-title"></h3>
     <div id="m-body"></div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <div class="ib-inner">
+    <div class="ib-text">
+      <div class="ib-icon">
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      </div>
+      <div class="ib-info">
+        <h4>Cài đặt Lịch Học</h4>
+        <p>Thêm vào màn hình chính để truy cập nhanh</p>
+      </div>
+    </div>
+    <div class="ib-actions">
+      <button class="ib-install" onclick="installApp()">Cài đặt</button>
+      <button class="ib-dismiss" onclick="dismissBanner()">Để sau</button>
+    </div>
   </div>
 </div>
 
@@ -778,6 +863,52 @@ function closeModalBg(e){if(e.target===document.getElementById('modal'))document
 
 /* INIT */
 renderStrip();renderTT();renderSubjects();renderReminders();
+
+/* PWA INSTALL */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  document.getElementById('installBtn').classList.add('show');
+  // Show banner after 3 seconds if not dismissed before
+  if(!localStorage.getItem('pwa-banner-dismissed')){
+    setTimeout(()=>{
+      document.getElementById('installBanner').classList.add('show');
+    },3000);
+  }
+});
+
+window.addEventListener('appinstalled',()=>{
+  deferredPrompt=null;
+  document.getElementById('installBtn').classList.remove('show');
+  document.getElementById('installBanner').classList.remove('show');
+});
+
+function installApp(){
+  if(!deferredPrompt){
+    // Fallback: show instructions for manual install
+    alert('Để cài đặt ứng dụng:\n\n📱 iPhone/iPad:\nMở bằng Safari → Nhấn nút Chia sẻ (⬆) → Chọn "Thêm vào MH chính"\n\n📱 Android:\nMở bằng Chrome → Nhấn ⋮ (menu) → Chọn "Thêm vào MH chính"\n\n💻 PC:\nMở bằng Chrome/Edge → Nhấn biểu tượng cài đặt trên thanh địa chỉ');
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted'){
+      document.getElementById('installBtn').classList.remove('show');
+      document.getElementById('installBanner').classList.remove('show');
+    }
+    deferredPrompt=null;
+  });
+}
+
+function dismissBanner(){
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('pwa-banner-dismissed','1');
+}
+
+/* SERVICE WORKER */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
 </script>
 </body>
 </html>
