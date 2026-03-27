@@ -3,9 +3,11 @@
 <head>
 <script>
 (function () {
-  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('force') === 'desktop') return;
+  var isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
   if (isMobile) {
-    window.location.href = "/index.mobile.html";
+    window.location.replace('./index.mobile.html');
   }
 })();
 </script>

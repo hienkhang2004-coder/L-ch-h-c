@@ -2,6 +2,16 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('force') === 'mobile') return;
+  var isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  if (!isMobile) {
+    window.location.replace('./index.html');
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lịch Học — 2022KTT</title>
 <link rel="manifest" href="./manifest.json">
