@@ -134,5 +134,18 @@
     "new_note_url": "./index.html#nhacnho"
   },
   "categories": ["education", "productivity"],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://22kttcalender.space/manifest.json",
+      "id": "lichhoc-2022ktt"
+    }
+  ],
+  "iarc_rating_id": "",
+  "scope_extensions": [
+    {
+      "origin": "https://22kttcalender.space"
+    }
+  ]
 }
