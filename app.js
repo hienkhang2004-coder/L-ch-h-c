@@ -1,4 +1,4 @@
-﻿// APP.JS - Lich Hoc 2022KTT (Desktop) - Extracted from index.html
+// APP.JS - Lich Hoc 2022KTT (Desktop) - Extracted from index.html
 
 /* DATA */
 const subjects=[
@@ -780,4 +780,297 @@ function dismissBanner(){
 /* SERVICE WORKER */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   AI IMPORT — Nhập lịch từ trang tín chỉ bằng Gemini AI
+   ══════════════════════════════════════════════════════════════════════ */
+
+const GEMINI_KEY = 'AIzaSyDyrdqNz8UF3RqAJ5aFA8HBh2cG5kbH_zE';
+let importedData = null;
+
+function openImportModal() {
+  const modal = document.getElementById('importModal');
+  modal.classList.add('open');
+  /* Auto-fill key */
+  const keyEl = document.getElementById('geminiKey');
+  if (keyEl) keyEl.value = GEMINI_KEY;
+  /* Reset state */
+  document.getElementById('importStatus').textContent = '';
+  document.getElementById('importPreview').style.display = 'none';
+}
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('geminiKey');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+async function aiParseSchedule() {
+  /* Use built-in key, fallback to user input */
+  const keyEl = document.getElementById('geminiKey');
+  const apiKey = GEMINI_KEY || (keyEl ? keyEl.value.trim() : '');
+  const htmlContent = document.getElementById('importHtml').value.trim();
+  const statusEl = document.getElementById('importStatus');
+  const btn = document.getElementById('importBtn');
+  const btnText = document.getElementById('importBtnText');
+
+  /* Validate */
+  if (!apiKey) {
+    statusEl.className = 'import-status error';
+    statusEl.textContent = '⚠ Không có API Key.';
+    return;
+  }
+  if (!htmlContent || htmlContent.length < 20) {
+    statusEl.className = 'import-status error';
+    statusEl.textContent = '⚠ Vui lòng paste nội dung bảng thời khóa biểu.';
+    return;
+  }
+
+  /* Save key */
+  localStorage.setItem('gemini-api-key', apiKey);
+
+  /* Loading state */
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btnText.textContent = 'Đang đọc...';
+  statusEl.className = 'import-status loading';
+  statusEl.textContent = '🤖 AI đang phân tích bảng thời khóa biểu...';
+
+  const ACCENT_COLORS = [
+    {ac:'a1',hex:'#983514'},{ac:'a2',hex:'#7a6547'},{ac:'a3',hex:'#4a7c6b'},
+    {ac:'a4',hex:'#5a5a8a'},{ac:'a5',hex:'#8a6020'},{ac:'a6',hex:'#7a4060'},
+    {ac:'a7',hex:'#2a6a7a'},{ac:'a8',hex:'#5a8a3a'},{ac:'a9',hex:'#8a4a4a'},
+    {ac:'a10',hex:'#4a6a8a'},{ac:'a11',hex:'#6a8a5a'},{ac:'a12',hex:'#8a6a4a'}
+  ];
+
+  const prompt = `Bạn là AI chuyên đọc thời khóa biểu đại học Việt Nam. Phân tích nội dung sau và trích xuất TOÀN BỘ môn học.
+
+Nội dung bảng TKB:
+---
+${htmlContent.substring(0, 15000)}
+---
+
+Trả về JSON ARRAY (không markdown, không giải thích) với format chính xác:
+[
+  {
+    "name": "Tên viết tắt môn học (ngắn gọn)",
+    "full": "Tên đầy đủ môn học",
+    "tc": 2,
+    "cls": "Mã lớp tín chỉ",
+    "teacher": "Tên giảng viên",
+    "schedules": [
+      {
+        "from": "DD/MM/YYYY",
+        "to": "DD/MM/YYYY",
+        "thu": 2,
+        "tiet": "1-3",
+        "room": "Phòng học"
+      }
+    ]
+  }
+]
+
+QUY TẮC QUAN TRỌNG:
+- "thu": Thứ trong tuần: 2=Thứ 2, 3=Thứ 3, ..., 7=Thứ 7, 1=Chủ nhật
+- "tiet": Tiết học, VD: "1-3", "4-6", "7-9", "10-12", "2-6"
+- "from"/"to": Ngày bắt đầu/kết thúc, format DD/MM/YYYY
+- "tc": Số tín chỉ (integer)
+- Nếu 1 môn có nhiều lịch học khác nhau (khác thứ/tiết/giai đoạn), tạo nhiều entry trong "schedules"
+- Nếu không rõ ngày, dùng ngày hợp lý trong học kỳ hiện tại
+- CHỈ trả về JSON array, KHÔNG có text khác`;
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 8192,
+          }
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    /* Extract JSON from response */
+    let jsonStr = text;
+    /* Remove markdown code block if present */
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) jsonStr = jsonMatch[1];
+    /* Try direct parse */
+    jsonStr = jsonStr.trim();
+    if (!jsonStr.startsWith('[')) {
+      const arrMatch = jsonStr.match(/\[[\s\S]*\]/);
+      if (arrMatch) jsonStr = arrMatch[0];
+    }
+
+    const parsed = JSON.parse(jsonStr);
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new Error('AI không tìm thấy môn học nào trong nội dung.');
+    }
+
+    /* Convert to app format */
+    importedData = parsed.map((item, i) => ({
+      id: i + 1,
+      ac: ACCENT_COLORS[i % ACCENT_COLORS.length].ac,
+      hex: ACCENT_COLORS[i % ACCENT_COLORS.length].hex,
+      name: item.name || item.full?.substring(0, 20) || `Môn ${i+1}`,
+      full: item.full || item.name || `Môn học ${i+1}`,
+      tc: parseInt(item.tc) || 2,
+      cls: item.cls || '',
+      teacher: item.teacher || '—',
+      sch: (item.schedules || []).map(s => ({
+        from: s.from || '',
+        to: s.to || '',
+        thu: parseInt(s.thu) || 2,
+        tiet: s.tiet || '1-3',
+        room: s.room || ''
+      }))
+    }));
+
+    /* Show preview */
+    statusEl.className = 'import-status success';
+    statusEl.textContent = `✓ Tìm thấy ${importedData.length} môn học!`;
+    renderImportPreview(importedData);
+
+  } catch (err) {
+    statusEl.className = 'import-status error';
+    if (err.message.includes('API_KEY_INVALID') || err.message.includes('401')) {
+      statusEl.textContent = '✗ API Key không hợp lệ. Kiểm tra lại key tại aistudio.google.com/apikey';
+    } else if (err.message.includes('JSON')) {
+      statusEl.textContent = '✗ AI trả về format không đúng. Thử paste lại nội dung TKB rõ hơn.';
+    } else {
+      statusEl.textContent = `✗ Lỗi: ${err.message}`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btnText.textContent = '🤖 AI Đọc lịch';
+  }
+}
+
+function renderImportPreview(data) {
+  const preview = document.getElementById('importPreview');
+  const info = document.getElementById('importInfo');
+  const tableWrap = document.getElementById('importTableWrap');
+
+  const totalTC = data.reduce((sum, s) => sum + s.tc, 0);
+  const totalSch = data.reduce((sum, s) => sum + s.sch.length, 0);
+
+  info.innerHTML = `
+    <strong>${data.length} môn học</strong> · ${totalTC} tín chỉ · ${totalSch} lịch trình
+    <br><span style="font-size:0.65rem;color:var(--muted)">Kiểm tra thông tin bên dưới trước khi áp dụng</span>
+  `;
+
+  let tableHtml = `<table>
+    <thead><tr><th>#</th><th>Tên môn</th><th>TC</th><th>GV</th><th>Thứ</th><th>Tiết</th><th>Phòng</th><th>Từ</th><th>Đến</th></tr></thead>
+    <tbody>`;
+
+  const dayNames = {1:'CN',2:'T2',3:'T3',4:'T4',5:'T5',6:'T6',7:'T7'};
+
+  for (const s of data) {
+    if (s.sch.length === 0) {
+      tableHtml += `<tr>
+        <td>${s.id}</td><td><strong>${s.name}</strong></td>
+        <td>${s.tc}</td><td>${s.teacher}</td>
+        <td colspan="4" style="color:var(--muted)">Chưa có lịch</td><td></td>
+      </tr>`;
+    }
+    for (let j = 0; j < s.sch.length; j++) {
+      const sc = s.sch[j];
+      tableHtml += `<tr>
+        <td>${j === 0 ? s.id : ''}</td>
+        <td>${j === 0 ? `<strong>${s.name}</strong>` : ''}</td>
+        <td>${j === 0 ? s.tc : ''}</td>
+        <td>${j === 0 ? s.teacher : ''}</td>
+        <td>${dayNames[sc.thu] || sc.thu}</td>
+        <td>${sc.tiet}</td>
+        <td>${sc.room || '—'}</td>
+        <td>${sc.from}</td>
+        <td>${sc.to}</td>
+      </tr>`;
+    }
+  }
+
+  tableHtml += '</tbody></table>';
+  tableWrap.innerHTML = tableHtml;
+  preview.style.display = 'block';
+  preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function applyImportedSchedule() {
+  if (!importedData || importedData.length === 0) return;
+
+  /* Replace subjects array */
+  subjects.length = 0;
+  for (const s of importedData) subjects.push(s);
+
+  /* Save to localStorage so it persists */
+  localStorage.setItem('custom-schedule', JSON.stringify(importedData));
+
+  /* Re-render everything */
+  document.getElementById('subjects-grid').innerHTML = '';
+  document.getElementById('rem-list').innerHTML = '';
+  renderStrip();
+  renderTT();
+  renderSubjects();
+  renderReminders();
+  renderProgress();
+  checkCurrentClass();
+
+  /* Close modal */
+  document.getElementById('importModal').classList.remove('open');
+
+  /* Show success */
+  alert(`✓ Đã áp dụng lịch mới: ${importedData.length} môn học!\n\nLịch được lưu vào trình duyệt. Reload trang vẫn giữ nguyên.`);
+}
+
+/* ── LOAD CUSTOM SCHEDULE ON STARTUP ───────────────────────────────────── */
+(function loadCustomSchedule() {
+  const saved = localStorage.getItem('custom-schedule');
+  if (saved) {
+    try {
+      const custom = JSON.parse(saved);
+      if (Array.isArray(custom) && custom.length > 0) {
+        subjects.length = 0;
+        for (const s of custom) subjects.push(s);
+        /* Re-render with custom data */
+        setTimeout(() => {
+          document.getElementById('subjects-grid').innerHTML = '';
+          document.getElementById('rem-list').innerHTML = '';
+          renderStrip(); renderTT(); renderSubjects();
+          renderReminders(); renderProgress(); checkCurrentClass();
+        }, 50);
+      }
+    } catch(e) { console.warn('Custom schedule parse error:', e); }
+  }
+})();
+
+/* ── DATA BACKUP ──────────────────────────────────────────────────────── */
+function exportBackup() {
+  const data = {
+    exportDate: new Date().toISOString(),
+    schedule: JSON.parse(localStorage.getItem('custom-schedule') || 'null') || subjects,
+    attendance: JSON.parse(localStorage.getItem('attendance') || '{}'),
+    notes: JSON.parse(localStorage.getItem('subjectNotes') || '{}'),
+    theme: localStorage.getItem('theme') || 'light',
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `lichhoc-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
