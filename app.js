@@ -1021,6 +1021,8 @@ QUY TẮC QUAN TRỌNG:
     statusEl.className = 'import-status error';
     if (err.message.includes('API_KEY_INVALID') || err.message.includes('401')) {
       statusEl.textContent = '✗ API Key không hợp lệ. Kiểm tra lại key tại aistudio.google.com/apikey';
+    } else if (err.message.includes('429') || err.message.includes('Quota exceeded') || err.message.includes('Too Many Requests')) {
+      statusEl.textContent = '⏳ Hệ thống AI đang quá tải cục bộ. Bạn vui lòng chờ 30 giây rồi bấm thử lại nhé!';
     } else if (err.message.includes('JSON')) {
       statusEl.textContent = '✗ AI trả về format không đúng. Thử paste lại nội dung TKB rõ hơn.';
     } else {

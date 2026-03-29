@@ -664,7 +664,12 @@ QUY TẮC QUAN TRỌNG:
     statusEl.className = 'import-status success'; statusEl.textContent = `✓ Tìm thấy ${importedData.length} môn học!`;
     renderImportPreview(importedData);
   } catch (err) {
-    statusEl.className = 'import-status error'; statusEl.textContent = `✗ Lỗi: ${err.message}`;
+    statusEl.className = 'import-status error';
+    if (err.message.includes('429') || err.message.includes('Quota exceeded') || err.message.includes('Too Many Requests')) {
+      statusEl.textContent = '⏳ Hệ thống AI đang quá tải cục bộ. Bạn vui lòng chờ 30 giây rồi bấm thử lại nhé!';
+    } else {
+      statusEl.textContent = `✗ Lỗi: ${err.message}`;
+    }
   } finally {
     btn.disabled = false; btn.classList.remove('loading'); btnText.textContent = '🤖 AI Đọc lịch';
   }
