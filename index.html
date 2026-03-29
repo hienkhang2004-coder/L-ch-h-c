@@ -28,7 +28,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a class="nav-brand" href="#"><em>Lịch</em> Học Kỳ · 2022KTT</a>
+    <a class="nav-brand" href="#"><em>Lịch</em> Học Kỳ · <span id="custom-nav-class" contenteditable="true" onblur="saveCustomText('nav-class', this.innerText)" spellcheck="false" title="Nhấn để đổi tên">2022KTT</span></a>
     <ul class="nav-links">
       <li><a href="#thoikhoa">Thời khóa biểu</a></li>
       <li><a href="#hocphan">Học phần</a></li>
@@ -50,18 +50,18 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-ghost">KTT</div>
+  <div class="hero-ghost">SV</div>
   <div class="hero-inner">
-    <div class="hero-eyebrow">Trường Đại học Kiến trúc Hà Nội</div>
-    <h1 class="hero-title">Lịch Học<br><em>Kỳ II</em><br>2025–2026</h1>
+    <div class="hero-eyebrow" id="custom-uni" contenteditable="true" onblur="saveCustomText('uni', this.innerText)" spellcheck="false" title="Nhấn để đổi tên trường">Trường Đại học Kiến trúc Hà Nội</div>
+    <h1 class="hero-title" id="custom-term" contenteditable="true" onblur="saveCustomText('term', this.innerHTML)" spellcheck="false" title="Nhấn để đổi Tên kỳ học">Lịch Học<br><em>Kỳ II</em><br>2025–2026</h1>
     <div class="hero-stats">
       <div class="hs-item">
         <div class="hs-label">Lớp</div>
-        <div class="hs-value">2022KTT</div>
+        <div class="hs-value" id="custom-class" contenteditable="true" onblur="saveCustomText('class', this.innerText)" spellcheck="false" title="Nhấn để đổi">2022KTT</div>
       </div>
       <div class="hs-item">
         <div class="hs-label">Chuyên ngành</div>
-        <div class="hs-value">Kiến trúc</div>
+        <div class="hs-value" id="custom-major" contenteditable="true" onblur="saveCustomText('major', this.innerText)" spellcheck="false" title="Nhấn để đổi">Kiến trúc</div>
       </div>
       <div class="hs-item">
         <div class="hs-label">Tổng tín chỉ</div>

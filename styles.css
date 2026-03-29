@@ -59,6 +59,12 @@ body {
   overflow-x: hidden;
 }
 
+[contenteditable="true"] { transition: background 0.2s; border-radius: 4px; padding: 0 4px; margin: 0 -4px; }
+[contenteditable="true"]:hover { background: rgba(152,53,20,0.05); cursor: text; }
+[contenteditable="true"]:focus { outline: none; background: rgba(152,53,20,0.1); }
+[data-theme="dark"] [contenteditable="true"]:hover { background: rgba(232,118,74,0.1); }
+[data-theme="dark"] [contenteditable="true"]:focus { background: rgba(232,118,74,0.2); }
+
 /* ── NAV ───────────────────────────────────────────────────────────────── */
 nav {
   position: fixed; top:0; left:0; right:0; z-index:200;

@@ -1142,3 +1142,28 @@ function exportBackup() {
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
+/* ── CUSTOM TEXT EDITING ────────────────────────────────────────────────── */
+function saveCustomText(key, val) {
+  localStorage.setItem('custom-text-' + key, val);
+  if (key === 'class') {
+    const navEl = document.getElementById('custom-nav-class');
+    if (navEl && navEl.innerText !== val) { navEl.innerText = val; localStorage.setItem('custom-text-nav-class', val); }
+  } else if (key === 'nav-class') {
+    const classEl = document.getElementById('custom-class');
+    if (classEl && classEl.innerText !== val) { classEl.innerText = val; localStorage.setItem('custom-text-class', val); }
+  }
+}
+(function loadCustomTexts() {
+  const keys = ['nav-class', 'uni', 'term', 'class', 'major'];
+  keys.forEach(k => {
+    const val = localStorage.getItem('custom-text-' + k);
+    if (val) {
+      const el = document.getElementById('custom-' + k);
+      if (el) {
+        if (k === 'term') el.innerHTML = val;
+        else el.innerText = val;
+      }
+    }
+  });
+})();

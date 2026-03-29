@@ -27,7 +27,7 @@
 
 <!-- TOP NAV -->
 <nav class="top-nav">
-  <a class="nav-brand" href="#"><em>Lịch</em> Học Kỳ · 2022KTT</a>
+  <a class="nav-brand" href="#"><em>Lịch</em> Học Kỳ · <span id="custom-nav-class" contenteditable="true" onblur="saveCustomText('nav-class', this.innerText)" spellcheck="false">2022KTT</span></a>
   <button class="install-btn" id="installBtn" onclick="installApp()">
     <svg viewBox="0 0 24 24"><path d="M13 5v6h1.17L12 13.17 9.83 11H11V5h2m2-2H9v6H5l7 7 7-7h-4V3zm4 15H5v2h14v-2z"/></svg>
     Cài App
@@ -43,13 +43,13 @@
 
 <!-- HERO -->
 <section class="hero" id="today">
-  <div class="hero-ghost">KTT</div>
+  <div class="hero-ghost">SV</div>
   <div class="hero-inner">
-    <div class="hero-eyebrow">Trường Đại học Kiến trúc Hà Nội</div>
-    <h1 class="hero-title">Lịch Học<br><em>Kỳ II</em><br>2025–2026</h1>
+    <div class="hero-eyebrow" id="custom-uni" contenteditable="true" onblur="saveCustomText('uni', this.innerText)" spellcheck="false">Trường Đại học Kiến trúc Hà Nội</div>
+    <h1 class="hero-title" id="custom-term" contenteditable="true" onblur="saveCustomText('term', this.innerHTML)" spellcheck="false">Lịch Học<br><em>Kỳ II</em><br>2025–2026</h1>
     <div class="hero-stats">
-      <div class="hs-item"><div class="hs-label">Lớp</div><div class="hs-value">2022KTT</div></div>
-      <div class="hs-item"><div class="hs-label">Chuyên ngành</div><div class="hs-value">Kiến trúc</div></div>
+      <div class="hs-item"><div class="hs-label">Lớp</div><div class="hs-value" id="custom-class" contenteditable="true" onblur="saveCustomText('class', this.innerText)" spellcheck="false">2022KTT</div></div>
+      <div class="hs-item"><div class="hs-label">Chuyên ngành</div><div class="hs-value" id="custom-major" contenteditable="true" onblur="saveCustomText('major', this.innerText)" spellcheck="false">Kiến trúc</div></div>
       <div class="hs-item"><div class="hs-label">Tổng tín chỉ</div><div class="hs-value">18 TC</div></div>
       <div class="hs-item"><div class="hs-label">Số học phần</div><div class="hs-value">7 Môn</div></div>
     </div>
