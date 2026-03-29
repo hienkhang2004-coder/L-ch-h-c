@@ -1173,3 +1173,9 @@ function saveCustomText(key, val) {
     }
   });
 })();
+
+// Prepare Print
+window.preparePrint = function() {
+  localStorage.setItem('temp-print-data', JSON.stringify(subjects));
+  window.open('print.html', '_blank');
+};

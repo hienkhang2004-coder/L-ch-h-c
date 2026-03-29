@@ -469,8 +469,14 @@ function exportICS(){
   for(const s of subjects){for(const sc of s.sch){const from=pd(sc.from),to=pd(sc.to);const[startMin,endMin]=PT_MINS[sc.tiet]||[420,565];let d=new Date(from);while(d<=to){if(vtj(sc.thu)===d.getDay()){const ds=new Date(d);ds.setHours(0,startMin,0,0);const de=new Date(d);de.setHours(0,endMin,0,0);const fmt=dt=>`${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}T${String(Math.floor(dt.getMinutes()/60+dt.getHours())).padStart(2,'0')}${String(dt.getMinutes()%60).padStart(2,'0')}00`;cal+=`BEGIN:VEVENT\r\nDTSTART:${fmt(ds)}\r\nDTEND:${fmt(de)}\r\nSUMMARY:${s.full}\r\nLOCATION:${sc.room||''}\r\nDESCRIPTION:${s.teacher} · ${s.cls}\r\nEND:VEVENT\r\n`;}d=ad(d,1);}}}
   cal+='END:VCALENDAR\r\n';
   const blob=new Blob([cal],{type:'text/calendar;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`LichHoc_${safeClass}_${termName}.ics`;a.click();URL.revokeObjectURL(a.href);
+  const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download=`LichHoc_${safeClass}_${termName}.ics`;a.click();window.URL.revokeObjectURL(url);
 }
+
+// Prepare Print
+window.preparePrint = function() {
+  localStorage.setItem('temp-print-data', JSON.stringify(subjects));
+  window.open('print.html', '_blank');
+};
 
 /* NOTIFICATIONS */
 let notifEnabled=localStorage.getItem('notif-enabled')==='1';
