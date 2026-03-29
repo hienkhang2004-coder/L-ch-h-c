@@ -1,4 +1,4 @@
-﻿// APP.MOBILE.JS - Lich Hoc 2022KTT (Mobile) - Extracted from index.mobile.html
+// APP.MOBILE.JS - Lich Hoc 2022KTT (Mobile) - Extracted from index.mobile.html
 
 /* DATA */
 const subjects=[
@@ -526,6 +526,178 @@ function dismissBanner(){document.getElementById('installBanner').classList.remo
 
 /* SERVICE WORKER */
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+
+/* ══════════════════════════════════════════════════════════════════════
+   AI IMPORT — Nhập lịch từ trang tín chỉ bằng Gemini AI
+   ══════════════════════════════════════════════════════════════════════ */
+
+const GEMINI_KEY = 'AIzaSyAgpldrzcUGZgutRKAD50ueBYriRRC8ej8';
+let importedData = null;
+
+function openImportModal() {
+  const modal = document.getElementById('importModal');
+  modal.classList.add('open');
+  const keyEl = document.getElementById('geminiKey');
+  if (keyEl) keyEl.value = GEMINI_KEY;
+  document.getElementById('importStatus').textContent = '';
+  document.getElementById('importPreview').style.display = 'none';
+  const imgInput = document.getElementById('importImage');
+  if(imgInput) imgInput.value = '';
+  const imgWrap = document.getElementById('importImagePreviewWrap');
+  if(imgWrap) imgWrap.style.display = 'none';
+}
+
+function previewImportImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('importImagePreview').src = e.target.result;
+      document.getElementById('importImagePreviewWrap').style.display = 'block';
+    }
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function removeImportImage() {
+  document.getElementById('importImage').value = '';
+  document.getElementById('importImagePreview').src = '';
+  document.getElementById('importImagePreviewWrap').style.display = 'none';
+}
+
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.toString().replace(/^data:(.*,)?/, ''));
+    reader.onerror = error => reject(error);
+  });
+}
+
+document.addEventListener('paste', function(e) {
+  const modal = document.getElementById('importModal');
+  if(!modal || !modal.classList.contains('open')) return;
+  if (e.clipboardData && e.clipboardData.items) {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        const fileInput = document.getElementById('importImage');
+        if (fileInput) { fileInput.files = dataTransfer.files; previewImportImage(fileInput); e.preventDefault(); }
+        break;
+      }
+    }
+  }
+});
+
+async function aiParseSchedule() {
+  const keyEl = document.getElementById('geminiKey');
+  const apiKey = GEMINI_KEY || (keyEl ? keyEl.value.trim() : '');
+  const htmlContent = document.getElementById('importHtml').value.trim();
+  const fileInput = document.getElementById('importImage');
+  const file = fileInput ? fileInput.files[0] : null;
+  const statusEl = document.getElementById('importStatus');
+  const btn = document.getElementById('importBtn');
+  const btnText = document.getElementById('importBtnText');
+
+  if (!apiKey) { statusEl.className = 'import-status error'; statusEl.textContent = '⚠ Không có API Key.'; return; }
+  if (!file && (!htmlContent || htmlContent.length < 20)) {
+    statusEl.className = 'import-status error'; statusEl.textContent = '⚠ Vui lòng chọn ảnh chụp hoặc paste nội dung chữ.'; return;
+  }
+
+  localStorage.setItem('gemini-api-key', apiKey);
+  btn.disabled = true; btn.classList.add('loading'); btnText.textContent = 'Đang đọc...';
+  statusEl.className = 'import-status loading'; statusEl.textContent = '🤖 AI đang phân tích bảng thời khóa biểu...';
+
+  const ACCENT_COLORS = [
+    {ac:'a1',hex:'#983514'},{ac:'a2',hex:'#7a6547'},{ac:'a3',hex:'#4a7c6b'},
+    {ac:'a4',hex:'#5a5a8a'},{ac:'a5',hex:'#8a6020'},{ac:'a6',hex:'#7a4060'},
+    {ac:'a7',hex:'#2a6a7a'},{ac:'a8',hex:'#5a8a3a'},{ac:'a9',hex:'#8a4a4a'},
+    {ac:'a10',hex:'#4a6a8a'},{ac:'a11',hex:'#6a8a5a'},{ac:'a12',hex:'#8a6a4a'}
+  ];
+  const prompt = `Bạn là AI chuyên đọc thời khóa biểu đại học Việt Nam. Phân tích nội dung sau (ảnh chụp màn hình hoặc chữ) và trích xuất TOÀN BỘ môn học.
+
+Trả về JSON ARRAY (không markdown, không giải thích) với format chính xác:
+[ { "name": "Tên viết tắt môn", "full": "Tên đầy đủ môn học", "tc": 2, "cls": "Mã lớp", "teacher": "Tên GV", "schedules": [ { "from": "DD/MM/YYYY", "to": "DD/MM/YYYY", "thu": 2, "tiet": "1-3", "room": "Phòng" } ] } ]
+QUY TẮC QUAN TRỌNG:
+- "thu": 2=Thứ 2, ..., 7=Thứ 7, 1=CN
+- "tiet": "1-3", "4-6", "10-12", "2-6"
+- "from"/"to": DD/MM/YYYY
+- "tc": integer
+- Trả về JSON ARRAY, KHÔNG text khác.`;
+
+  try {
+    let parts = [];
+    if (file) {
+      const base64Data = await getBase64(file);
+      parts.push({ inlineData: { data: base64Data, mimeType: file.type } });
+    }
+    if (htmlContent) { parts.push({ text: `Nội dung chữ:\n---\n${htmlContent.substring(0, 15000)}\n---` }); }
+    parts.push({ text: prompt });
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: parts }], generationConfig: { temperature: 0.1 } })
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) text = jsonMatch[1];
+    text = text.trim();
+    if (!text.startsWith('[')) { const arrMatch = text.match(/\[[\s\S]*\]/); if(arrMatch) text = arrMatch[0]; }
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('AI không tìm thấy môn học nào.');
+
+    importedData = parsed.map((item, i) => ({
+      id: i + 1, ac: ACCENT_COLORS[i % ACCENT_COLORS.length].ac, hex: ACCENT_COLORS[i % ACCENT_COLORS.length].hex,
+      name: item.name || `Môn ${i+1}`, full: item.full || `Môn học ${i+1}`, tc: parseInt(item.tc) || 2,
+      cls: item.cls || '', teacher: item.teacher || '—',
+      sch: (item.schedules || []).map(s => ({ from: s.from||'', to: s.to||'', thu: parseInt(s.thu)||2, tiet: s.tiet||'1-3', room: s.room||'' }))
+    }));
+
+    statusEl.className = 'import-status success'; statusEl.textContent = `✓ Tìm thấy ${importedData.length} môn học!`;
+    renderImportPreview(importedData);
+  } catch (err) {
+    statusEl.className = 'import-status error'; statusEl.textContent = `✗ Lỗi: ${err.message}`;
+  } finally {
+    btn.disabled = false; btn.classList.remove('loading'); btnText.textContent = '🤖 AI Đọc lịch';
+  }
+}
+
+function renderImportPreview(data) {
+  const preview = document.getElementById('importPreview');
+  const info = document.getElementById('importInfo');
+  const tableWrap = document.getElementById('importTableWrap');
+  const totalTC = data.reduce((sum, s) => sum + s.tc, 0);
+  const totalSch = data.reduce((sum, s) => sum + s.sch.length, 0);
+  info.innerHTML = `<strong>${data.length} môn học</strong> · ${totalTC} TC · ${totalSch} lịch trình<br><span style="font-size:0.65rem;color:var(--muted)">Kiểm tra thông tin bên dưới trước khi áp dụng</span>`;
+  
+  let tableHtml = `<table><thead><tr><th>Tên môn</th><th>GV</th><th>Lịch</th></tr></thead><tbody>`;
+  const dayNames = {1:'CN',2:'T2',3:'T3',4:'T4',5:'T5',6:'T6',7:'T7'};
+  for (const s of data) {
+    tableHtml += `<tr><td style="white-space:normal"><strong>${s.name}</strong><br><span style="color:var(--muted)">${s.tc} TC</span></td><td>${s.teacher}</td><td>`;
+    for(const sc of s.sch) tableHtml += `<div>${dayNames[sc.thu]}·${sc.tiet} (${sc.room})</div>`;
+    tableHtml += `</td></tr>`;
+  }
+  tableHtml += '</tbody></table>';
+  tableWrap.innerHTML = tableHtml;
+  preview.style.display = 'block'; preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function applyImportedSchedule() {
+  if (!importedData || importedData.length === 0) return;
+  subjects.length = 0;
+  for (const s of importedData) subjects.push(s);
+  localStorage.setItem('custom-schedule', JSON.stringify(importedData));
+  
+  document.getElementById('subjects-grid').innerHTML = '';
+  document.getElementById('rem-list').innerHTML = '';
+  renderStrip(); renderTT(); renderSubjects(); renderReminders(); renderProgress(); checkCurrentClass();
+  document.getElementById('importModal').classList.remove('open');
+  alert(`✓ Đã áp dụng lịch mới: ${importedData.length} môn học!\nLịch được lưu vào thiết bị.`);
+}
 
 /* INIT */
 renderStrip();renderTT();renderSubjects();renderReminders();renderProgress();checkCurrentClass();
