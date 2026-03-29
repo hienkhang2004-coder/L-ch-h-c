@@ -4,13 +4,18 @@
 // + Periodic Background Sync & Background Sync
 // ═══════════════════════════════════════
 
-const CACHE_NAME = 'lichhoc-2022ktt-v4';
+const CACHE_NAME = 'lichhoc-2022ktt-v5';
 
 // Core assets to pre-cache on install
 const PRECACHE_ASSETS = [
   './',
   './index.html',
   './index.mobile.html',
+  './styles.css',
+  './styles.mobile.css',
+  './app.js',
+  './app.mobile.js',
+  './data/schedule.json',
   './manifest.json',
   './icon.svg',
   './icon-192x192.png',

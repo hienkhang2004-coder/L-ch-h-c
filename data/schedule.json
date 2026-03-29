@@ -1,0 +1,121 @@
+{
+  "semester": {
+    "name": "Kỳ II · 2025–2026",
+    "class": "2022KTT",
+    "major": "Kiến trúc",
+    "school": "Đại học Kiến trúc Hà Nội",
+    "totalCredits": 18,
+    "totalSubjects": 7
+  },
+  "subjects": [
+    {
+      "id": 1,
+      "ac": "a1",
+      "hex": "#983514",
+      "name": "Lịch sử Đảng CSVN",
+      "full": "Lịch sử Đảng cộng sản Việt Nam",
+      "tc": 2,
+      "cls": "CT4002_2022KTT 1",
+      "teacher": "Phạm Thị Kim Ngân",
+      "sch": [
+        { "from": "13/04/2026", "to": "24/05/2026", "thu": 6, "tiet": "1-3", "room": "H-H 3.03" },
+        { "from": "13/04/2026", "to": "31/05/2026", "thu": 3, "tiet": "1-3", "room": "H-H 2.03" }
+      ]
+    },
+    {
+      "id": 2,
+      "ac": "a2",
+      "hex": "#7a6547",
+      "name": "Thực hành & Quản lý",
+      "full": "Thực hành và Quản lý",
+      "tc": 3,
+      "cls": "PAM_2022KTT 1",
+      "teacher": "Nguyễn Minh Nhất",
+      "sch": [
+        { "from": "19/01/2026", "to": "08/02/2026", "thu": 3, "tiet": "4-6", "room": "M-M7.02" },
+        { "from": "19/01/2026", "to": "08/02/2026", "thu": 6, "tiet": "4-6", "room": "M-M7.03" },
+        { "from": "23/02/2026", "to": "22/03/2026", "thu": 6, "tiet": "4-6", "room": "M-M11.03" },
+        { "from": "23/02/2026", "to": "29/03/2026", "thu": 3, "tiet": "4-6", "room": "M-M12.03_X+" }
+      ]
+    },
+    {
+      "id": 3,
+      "ac": "a3",
+      "hex": "#4a7c6b",
+      "name": "Lịch sử KT & ĐT 2",
+      "full": "Lịch sử kiến trúc và đô thị 2",
+      "tc": 3,
+      "cls": "LSKT02_2022KTT 1",
+      "teacher": "Lê Chiến Thắng",
+      "sch": [
+        { "from": "13/04/2026", "to": "31/05/2026", "thu": 6, "tiet": "4-6", "room": "M-M 601" },
+        { "from": "13/04/2026", "to": "07/06/2026", "thu": 3, "tiet": "4-6", "room": "M-M 601" }
+      ]
+    },
+    {
+      "id": 4,
+      "ac": "a4",
+      "hex": "#5a5a8a",
+      "name": "ĐA Thiết kế CT6",
+      "full": "Đồ án thiết kế công trình 6",
+      "tc": 5,
+      "cls": "DACT06_2022KTT 1",
+      "teacher": "Lê Chiến Thắng",
+      "sch": [
+        { "from": "19/01/2026", "to": "08/02/2026", "thu": 2, "tiet": "2-6", "room": "C-XKTT1" },
+        { "from": "19/01/2026", "to": "08/02/2026", "thu": 5, "tiet": "2-6", "room": "M-M 604.XQT4" },
+        { "from": "23/02/2026", "to": "29/03/2026", "thu": 2, "tiet": "2-6", "room": "M-M 604.XQT4" },
+        { "from": "23/02/2026", "to": "29/03/2026", "thu": 5, "tiet": "2-6", "room": "M-M 604.XQT4" },
+        { "from": "13/04/2026", "to": "31/05/2026", "thu": 2, "tiet": "2-6", "room": "M-M 604.XQT4" },
+        { "from": "13/04/2026", "to": "31/05/2026", "thu": 5, "tiet": "2-6", "room": "M-M 604.XQT4" }
+      ]
+    },
+    {
+      "id": 5,
+      "ac": "a5",
+      "hex": "#8a6020",
+      "name": "NL Thiết kế CT cao tầng",
+      "full": "Nguyên lý thiết kế công trình cao tầng",
+      "tc": 2,
+      "cls": "LTTCT_2022KTT 1",
+      "teacher": "Hà Duy Anh",
+      "sch": [
+        { "from": "19/01/2026", "to": "08/02/2026", "thu": 4, "tiet": "10-12", "room": "H-H 5.05" },
+        { "from": "23/02/2026", "to": "29/03/2026", "thu": 4, "tiet": "10-12", "room": "H-H 5.05" },
+        { "from": "16/03/2026", "to": "29/03/2026", "thu": 7, "tiet": "10-12", "room": "H-H 5.05" }
+      ]
+    },
+    {
+      "id": 6,
+      "ac": "a6",
+      "hex": "#7a4060",
+      "name": "Xã hội học đô thị",
+      "full": "Xã hội học đô thị",
+      "tc": 2,
+      "cls": "XHHDT.1_2022KTT 1",
+      "teacher": "Nguyễn Vũ Bảo Minh",
+      "sch": [
+        { "from": "13/04/2026", "to": "07/06/2026", "thu": 4, "tiet": "4-6", "room": "M-M 601" },
+        { "from": "25/05/2026", "to": "07/06/2026", "thu": 7, "tiet": "4-6", "room": "M-M 601" }
+      ]
+    },
+    {
+      "id": 7,
+      "ac": "a7",
+      "hex": "#2a6a7a",
+      "name": "Thực tập công nhân",
+      "full": "Thực tập công nhân",
+      "tc": 1,
+      "cls": "TTCN_2022KTT 1",
+      "teacher": "—",
+      "sch": [
+        { "from": "15/06/2026", "to": "21/06/2026", "thu": 2, "tiet": "2-6", "room": "" },
+        { "from": "15/06/2026", "to": "21/06/2026", "thu": 3, "tiet": "2-6", "room": "" },
+        { "from": "15/06/2026", "to": "21/06/2026", "thu": 4, "tiet": "2-6", "room": "" },
+        { "from": "15/06/2026", "to": "21/06/2026", "thu": 5, "tiet": "2-6", "room": "" },
+        { "from": "15/06/2026", "to": "21/06/2026", "thu": 6, "tiet": "2-6", "room": "" },
+        { "from": "15/06/2026", "to": "21/06/2026", "thu": 7, "tiet": "2-6", "room": "" }
+      ]
+    }
+  ]
+}
