@@ -54,4 +54,7 @@
 🗺️ **[v9.0] - Bản đồ Vector Tương Tác HAU**
 *   [Update: Thời điểm 19:10 - 29/03/2026] Không dùng ảnh tĩnh tải Web nặng. Vẽ hoàn toàn khối Đồ họa SVG cho Trường Đại học Kiến trúc. Khi nhấp vào Lớp Học (Ví dụ: `M-M 7.02`), App kích hoạt CSS tự động tỏa sáng vòng quanh khối nhà Tòa Nhà (Nhà Mỹ Thuật, Tòa H Mới, Nhà E...) để tân sinh viên dò tìm phòng.
 
+📸 **[v10.0] - Sống Ảo với Tính năng Khoe Story**
+*   [Update: Thời điểm 19:20 - 29/03/2026] Bổ sung thư viện vẽ đồ họa HTML5 `<canvas>` nguyên thủy. Cho phép sinh viên bấm nút tạo một bức họa Glassmorphism trong suốt dọc (tỉ lệ 9:16) chứa trọn vẹn lịch học ngày thứ N để đăng trực tiếp khoe Instagram/Tin Facebook. Hoạt động Render Ofline mà không thèm phụ thuộc máy chủ.
+
 `Cảm ơn bạn đã đồng hành và xây dựng sản phẩm này!`
