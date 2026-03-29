@@ -633,7 +633,11 @@ fetchSharedNotes();
 
 /* ── EXPORT ICS ────────────────────────────────────────────────────────── */
 function exportICS(){
-  let cal='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LichHoc2022KTT//VI\r\nCALSCALE:GREGORIAN\r\n';
+  const className = localStorage.getItem('custom-text-class') || '2022KTT';
+  const termName = (localStorage.getItem('custom-text-term') || 'KyII').replace(/<[^>]+>/g, '').replace(/\s+/g, '_').substring(0, 30);
+  const safeClass = className.replace(/\s+/g, '_');
+  
+  let cal=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LichHoc_${safeClass}//VI\r\nCALSCALE:GREGORIAN\r\n`;
   for(const s of subjects){
     for(const sc of s.sch){
       const from=pd(sc.from),to=pd(sc.to);
@@ -654,7 +658,7 @@ function exportICS(){
   const blob=new Blob([cal],{type:'text/calendar;charset=utf-8'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='LichHoc_2022KTT_KyII.ics';
+  a.download=`LichHoc_${safeClass}_${termName}.ics`;
   a.click();
   URL.revokeObjectURL(a.href);
 }

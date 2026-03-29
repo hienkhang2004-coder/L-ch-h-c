@@ -461,11 +461,15 @@ fetchSharedNotes();
 
 /* EXPORT ICS */
 function exportICS(){
-  let cal='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LichHoc2022KTT//VI\r\nCALSCALE:GREGORIAN\r\n';
+  const className = localStorage.getItem('custom-text-class') || '2022KTT';
+  const termName = (localStorage.getItem('custom-text-term') || 'KyII').replace(/<[^>]+>/g, '').replace(/\s+/g, '_').substring(0, 30);
+  const safeClass = className.replace(/\s+/g, '_');
+  
+  let cal=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LichHoc_${safeClass}//VI\r\nCALSCALE:GREGORIAN\r\n`;
   for(const s of subjects){for(const sc of s.sch){const from=pd(sc.from),to=pd(sc.to);const[startMin,endMin]=PT_MINS[sc.tiet]||[420,565];let d=new Date(from);while(d<=to){if(vtj(sc.thu)===d.getDay()){const ds=new Date(d);ds.setHours(0,startMin,0,0);const de=new Date(d);de.setHours(0,endMin,0,0);const fmt=dt=>`${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}T${String(Math.floor(dt.getMinutes()/60+dt.getHours())).padStart(2,'0')}${String(dt.getMinutes()%60).padStart(2,'0')}00`;cal+=`BEGIN:VEVENT\r\nDTSTART:${fmt(ds)}\r\nDTEND:${fmt(de)}\r\nSUMMARY:${s.full}\r\nLOCATION:${sc.room||''}\r\nDESCRIPTION:${s.teacher} · ${s.cls}\r\nEND:VEVENT\r\n`;}d=ad(d,1);}}}
   cal+='END:VCALENDAR\r\n';
   const blob=new Blob([cal],{type:'text/calendar;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='LichHoc_2022KTT_KyII.ics';a.click();URL.revokeObjectURL(a.href);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`LichHoc_${safeClass}_${termName}.ics`;a.click();URL.revokeObjectURL(a.href);
 }
 
 /* NOTIFICATIONS */
