@@ -786,7 +786,7 @@ if('serviceWorker' in navigator){
    AI IMPORT — Nhập lịch từ trang tín chỉ bằng Gemini AI
    ══════════════════════════════════════════════════════════════════════ */
 
-const GEMINI_KEY = 'AIzaSyDyrdqNz8UF3RqAJ5aFA8HBh2cG5kbH_zE';
+const GEMINI_KEY = 'AIzaSyAgpldrzcUGZgutRKAD50ueBYriRRC8ej8';
 let importedData = null;
 
 function openImportModal() {
