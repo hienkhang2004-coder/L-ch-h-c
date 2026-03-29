@@ -798,6 +798,42 @@ function openImportModal() {
   /* Reset state */
   document.getElementById('importStatus').textContent = '';
   document.getElementById('importPreview').style.display = 'none';
+  const imgInput = document.getElementById('importImage');
+  if(imgInput) imgInput.value = '';
+  const imgWrap = document.getElementById('importImagePreviewWrap');
+  if(imgWrap) imgWrap.style.display = 'none';
+}
+
+function previewImportImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('importImagePreview').src = e.target.result;
+      document.getElementById('importImagePreviewWrap').style.display = 'block';
+    }
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function removeImportImage() {
+  document.getElementById('importImage').value = '';
+  document.getElementById('importImagePreview').src = '';
+  document.getElementById('importImagePreviewWrap').style.display = 'none';
+}
+
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
+      if ((encoded.length % 4) > 0) {
+        encoded += '='.repeat(4 - (encoded.length % 4));
+      }
+      resolve(encoded);
+    };
+    reader.onerror = error => reject(error);
+  });
 }
 
 function toggleKeyVisibility() {
@@ -810,6 +846,8 @@ async function aiParseSchedule() {
   const keyEl = document.getElementById('geminiKey');
   const apiKey = GEMINI_KEY || (keyEl ? keyEl.value.trim() : '');
   const htmlContent = document.getElementById('importHtml').value.trim();
+  const fileInput = document.getElementById('importImage');
+  const file = fileInput ? fileInput.files[0] : null;
   const statusEl = document.getElementById('importStatus');
   const btn = document.getElementById('importBtn');
   const btnText = document.getElementById('importBtnText');
@@ -820,9 +858,9 @@ async function aiParseSchedule() {
     statusEl.textContent = '⚠ Không có API Key.';
     return;
   }
-  if (!htmlContent || htmlContent.length < 20) {
+  if (!file && (!htmlContent || htmlContent.length < 20)) {
     statusEl.className = 'import-status error';
-    statusEl.textContent = '⚠ Vui lòng paste nội dung bảng thời khóa biểu.';
+    statusEl.textContent = '⚠ Vui lòng chọn ảnh chụp hoặc paste nội dung chữ.';
     return;
   }
 
@@ -843,12 +881,7 @@ async function aiParseSchedule() {
     {ac:'a10',hex:'#4a6a8a'},{ac:'a11',hex:'#6a8a5a'},{ac:'a12',hex:'#8a6a4a'}
   ];
 
-  const prompt = `Bạn là AI chuyên đọc thời khóa biểu đại học Việt Nam. Phân tích nội dung sau và trích xuất TOÀN BỘ môn học.
-
-Nội dung bảng TKB:
----
-${htmlContent.substring(0, 15000)}
----
+  const prompt = `Bạn là AI chuyên đọc thời khóa biểu đại học Việt Nam. Phân tích nội dung sau (ảnh chụp màn hình hoặc chữ) và trích xuất TOÀN BỘ môn học.
 
 Trả về JSON ARRAY (không markdown, không giải thích) với format chính xác:
 [
@@ -880,13 +913,25 @@ QUY TẮC QUAN TRỌNG:
 - CHỈ trả về JSON array, KHÔNG có text khác`;
 
   try {
+    let parts = [];
+    if (file) {
+      const base64Data = await getBase64(file);
+      parts.push({
+        inlineData: { data: base64Data, mimeType: file.type }
+      });
+    }
+    if (htmlContent) {
+      parts.push({ text: `Nội dung chữ/HTML bổ sung (nếu có):\n---\n${htmlContent.substring(0, 15000)}\n---` });
+    }
+    parts.push({ text: prompt });
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [{ parts: parts }],
           generationConfig: {
             temperature: 0.1,
             maxOutputTokens: 8192,

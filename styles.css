@@ -1,4 +1,4 @@
-﻿/* STYLES - Lich Hoc 2022KTT (Desktop) - Extracted from index.html */
+/* STYLES - Lich Hoc 2022KTT (Desktop) - Extracted from index.html */
 
 :root {
   --primary:       #983514;
@@ -771,6 +771,43 @@ footer {
   justify-content:center; font-size:1rem; transition:border-color 0.2s;
 }
 .import-toggle-key:hover { border-color:var(--primary); }
+.import-input-wrap {
+  display: flex; flex-direction: column; gap: 0.8rem;
+}
+.file-upload-box {
+  background: var(--surface-low); border: 1px dashed var(--line);
+  padding: 1rem; text-align: center; border-radius: 4px;
+}
+.file-upload-label {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: var(--font-l); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--primary); cursor: pointer;
+  padding: 0.5rem 1rem; border: 1px solid var(--primary); border-radius: 4px;
+  transition: all 0.2s;
+}
+.file-upload-label:hover {
+  background: var(--primary); color: var(--on-primary);
+}
+.file-upload-label svg {
+  width: 18px; height: 18px; fill: currentColor;
+}
+.remove-img-btn {
+  position: absolute; top: 0.2rem; right: 0.2rem; width: 24px; height: 24px;
+  background: var(--danger); color: white; border: none; border-radius: 50%;
+  cursor: pointer; font-weight: bold; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.import-or {
+  text-align: center; font-family: var(--font-l); font-size: 0.6rem;
+  letter-spacing: 0.15em; color: var(--muted); font-weight: 700;
+  position: relative;
+}
+.import-or::before, .import-or::after {
+  content: ''; position: absolute; top: 50%; width: 38%; height: 1px;
+  background: var(--line);
+}
+.import-or::before { left: 0; }
+.import-or::after { right: 0; }
 
 .import-textarea {
   width:100%; min-height:140px; max-height:300px;
