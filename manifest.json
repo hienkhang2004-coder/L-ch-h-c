@@ -12,6 +12,9 @@
     "window-controls-overlay",
     "minimal-ui"
   ],
+  "tab_strip": {
+    "home_tab": "auto"
+  },
   "background_color": "#fef9f1",
   "theme_color": "#983514",
   "orientation": "any",
