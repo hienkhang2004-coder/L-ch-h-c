@@ -836,6 +836,29 @@ function getBase64(file) {
   });
 }
 
+document.addEventListener('paste', function(e) {
+  const modal = document.getElementById('importModal');
+  if(!modal || !modal.classList.contains('open')) return;
+
+  if (e.clipboardData && e.clipboardData.items) {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        const fileInput = document.getElementById('importImage');
+        if (fileInput) {
+          fileInput.files = dataTransfer.files;
+          previewImportImage(fileInput);
+          e.preventDefault();
+        }
+        break;
+      }
+    }
+  }
+});
+
 function toggleKeyVisibility() {
   const input = document.getElementById('geminiKey');
   input.type = input.type === 'password' ? 'text' : 'password';
