@@ -283,7 +283,8 @@ function openModal(subj,sc,date){
   const rows=[
     ['Lớp tín chỉ',subj.cls],['Giảng viên',subj.teacher],['Số tín chỉ',subj.tc],
     ['Ngày học',fl(date)],[`Tiết học`,`${PL[sc.tiet]} · ${PT[sc.tiet]}`],
-    ['Phòng học',sc.room||'—'],['Giai đoạn',`${sc.from} → ${sc.to}`],
+    ['Phòng học', sc.room ? `${sc.room} <u style="margin-left:10px;color:var(--primary);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;" onclick="openMap('${sc.room}')">🗺️ Bản đồ</u>` : '—'],
+    ['Giai đoạn',`${sc.from} → ${sc.to}`],
   ];
   const body=document.getElementById('m-body');
   body.innerHTML=rows.map(([l,v])=>`<div class="m-row"><span class="ml">${l}</span><span class="mv">${v}</span></div>`).join('');
@@ -478,6 +479,14 @@ window.preparePrint = function() {
   window.open('print.html', '_blank');
 };
 
+// Reset Schedule
+window.resetSchedule = function() {
+  if(confirm("Xóa lịch AI mới nhập và quay về bản gốc mặc định?")) {
+    localStorage.removeItem('custom-schedule');
+    location.reload();
+  }
+};
+
 /* NOTIFICATIONS */
 let notifEnabled=localStorage.getItem('notif-enabled')==='1';
 let notifTimer=null;
@@ -541,14 +550,16 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').cat
    AI IMPORT — Nhập lịch từ trang tín chỉ bằng Gemini AI
    ══════════════════════════════════════════════════════════════════════ */
 
-const GEMINI_KEY = 'AIzaSyAgpldrzcUGZgutRKAD50ueBYriRRC8ej8';
 let importedData = null;
 
 function openImportModal() {
   const modal = document.getElementById('importModal');
   modal.classList.add('open');
   const keyEl = document.getElementById('geminiKey');
-  if (keyEl) keyEl.value = GEMINI_KEY;
+  if (keyEl) {
+    const saved = localStorage.getItem('gemini-api-key');
+    if (saved) keyEl.value = saved;
+  }
   document.getElementById('importStatus').textContent = '';
   document.getElementById('importPreview').style.display = 'none';
   const imgInput = document.getElementById('importImage');
@@ -650,7 +661,16 @@ QUY TẮC QUAN TRỌNG:
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: parts }], generationConfig: { temperature: 0.1 } })
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      let msg = err.error?.message || `HTTP ${response.status}`;
+      if (msg.includes('API_KEY_INVALID') || msg.includes('API key not valid')) {
+        msg = '🔑 Mã API Key không hợp lệ hoặc đã bị khoá. Truy cập Google AI Studio để tạo lại nhé!';
+      } else if (msg.includes('429') || msg.includes('Quota exceeded')) {
+        msg = '⏳ Hệ thống AI đang quá tải cục bộ. Bạn vui lòng chờ 30 giây rùi bấm thử lại nhé!';
+      }
+      throw new Error(msg);
+    }
     const data = await response.json();
     let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -671,11 +691,7 @@ QUY TẮC QUAN TRỌNG:
     renderImportPreview(importedData);
   } catch (err) {
     statusEl.className = 'import-status error';
-    if (err.message.includes('429') || err.message.includes('Quota exceeded') || err.message.includes('Too Many Requests')) {
-      statusEl.textContent = '⏳ Hệ thống AI đang quá tải cục bộ. Bạn vui lòng chờ 30 giây rồi bấm thử lại nhé!';
-    } else {
-      statusEl.textContent = `✗ Lỗi: ${err.message}`;
-    }
+    statusEl.textContent = `✗ Lỗi: ${err.message}`;
   } finally {
     btn.disabled = false; btn.classList.remove('loading'); btnText.textContent = '🤖 AI Đọc lịch';
   }
@@ -741,3 +757,172 @@ function saveCustomText(key, val) {
 
 /* INIT */
 renderStrip();renderTT();renderSubjects();renderReminders();renderProgress();checkCurrentClass();
+
+/* ── CAMPUS MAP ────────────────────────────────────────────────────────── */
+window.openMap = function(room) {
+  document.getElementById('modal').classList.remove('open');
+  const modal = document.getElementById('mapModal');
+  modal.classList.add('open');
+  document.getElementById('mapRoomTitle').textContent = `Phòng: ${room}`;
+  
+  const buildings = ['bdg-U', 'bdg-M', 'bdg-TL', 'bdg-Hold', 'bdg-G', 'bdg-H', 'bdg-E', 'bdg-C', 'bdg-K'];
+  buildings.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      el.setAttribute('fill', '#e2e8f0');
+      el.removeAttribute('filter');
+    }
+  });
+
+  let targetId = null;
+  let floor = '';
+  
+  const rUpper = room.toUpperCase();
+  if (rUpper.includes('C-')) targetId = 'bdg-C';
+  else if (rUpper.includes('E-')) targetId = 'bdg-E';
+  else if (rUpper.includes('M-M') || rUpper.includes('MỸ THUẬT') || rUpper.includes('MT')) targetId = 'bdg-M';
+  else if (rUpper.includes('H-H') || rUpper.match(/\bH-/)) targetId = 'bdg-H';
+  else if (rUpper.includes('G') || rUpper.includes('THI ĐẤU')) targetId = 'bdg-G';
+  else if (rUpper.includes('U') || rUpper.includes('I-')) targetId = 'bdg-U';
+  else if (rUpper.includes('TL') || rUpper.includes('TRIỂN LÃM')) targetId = 'bdg-TL';
+  else if (rUpper.includes('K')) targetId = 'bdg-K';
+
+  const match = rUpper.match(/[- ]([1-9])(0\d|\.\d+)/);
+  if (match) floor = match[1];
+  else {
+    const match2 = rUpper.match(/([1-9])(0\d)/);
+    if (match2) floor = match2[1];
+  }
+
+  let desc = `Khu vực: Chưa định vị được trên bản đồ.`;
+  if (targetId) {
+    const el = document.getElementById(targetId);
+    if(el) {
+      el.setAttribute('fill', '#ffc107');
+      el.setAttribute('filter', 'url(#glow)');
+      desc = `Đã tìm thấy khu vực tòa nhà!`;
+      if (floor) desc += ` → Mời bạn lên Tầng ${floor} nhé.`;
+    }
+  }
+  document.getElementById('mapRoomDesc').textContent = desc;
+};
+
+window.closeMap = function() {
+  document.getElementById('mapModal').classList.remove('open');
+};
+
+/* ── STORY EXPORT (INSTAGRAM) ───────────────────────────────────────────── */
+window.exportStory = function() {
+  let dateToExport = today;
+  if(typeof mobileDay !== 'undefined' && typeof ws !== 'undefined') {
+    dateToExport = ad(ws, mobileDay);
+  }
+  const classes = getCls(dateToExport);
+  
+  const width = 1080;
+  const height = 1920;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  // Background gradient: Deep Midnight / HAU colors
+  const grd = ctx.createLinearGradient(0, 0, width, height);
+  grd.addColorStop(0, '#1e1c26'); 
+  grd.addColorStop(1, '#0a090e');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, width, height);
+
+  // Decorative blobs
+  ctx.beginPath(); ctx.arc(150, 200, 400, 0, 2*Math.PI);
+  ctx.fillStyle = 'rgba(231, 76, 60, 0.15)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(950, 1600, 500, 0, 2*Math.PI);
+  ctx.fillStyle = 'rgba(52, 152, 219, 0.12)'; ctx.fill();
+
+  // Glassmorphism Header Panel
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+  roundRect(ctx, 100, 150, 880, 200, 50);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Draw Header text
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 75px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('LỊCH HỌC HÔM NAY', width/2, 250);
+
+  ctx.font = '45px sans-serif';
+  ctx.fillStyle = '#cbd5e1';
+  ctx.fillText(fl(dateToExport).toUpperCase(), width/2, 310);
+
+  // Draw subjects
+  let startY = 450;
+  if(classes.length === 0) {
+    ctx.font = 'italic 60px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Hôm nay rảnh rang! 🎉', width/2, height/2);
+  } else {
+    const order={'1-3':0,'2-6':1,'4-6':2,'10-12':3};
+    classes.sort((a,b)=>(order[a.sc.tiet]||0)-(order[b.sc.tiet]||0));
+    
+    for(const c of classes) {
+      if(startY > 1600) break; // Prevent overflow
+      // Block Background
+      ctx.fillStyle = c.s.hex;
+      roundRect(ctx, 100, startY, 880, 260, 45);
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 10;
+      ctx.fill();
+      ctx.shadowColor = 'transparent'; // reset
+      
+      // Texts
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.font = '800 60px sans-serif';
+      let shortName = c.s.name;
+      if(shortName.length > 21) shortName = shortName.substring(0,20) + '...';
+      ctx.fillText(shortName, 160, startY + 110);
+      
+      ctx.font = '500 42px sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillText(`${PL[c.sc.tiet]} (${PT[c.sc.tiet]})`, 160, startY + 190);
+      
+      // Room pill
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      const rTxt = c.sc.room || '—';
+      ctx.font = 'bold 50px sans-serif';
+      const mWidth = ctx.measureText(rTxt).width;
+      roundRect(ctx, 980 - mWidth - 60, startY + 60, mWidth + 60, 90, 45);
+      ctx.fill();
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(rTxt, 950, startY + 125);
+
+      startY += 300;
+    }
+  }
+
+  // Branding watermark
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = 'italic 35px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Tạo tự động bởi Ứng dụng Lịch Học - Kiến Trúc', width/2, 1850);
+
+  // Output
+  const link = document.createElement('a');
+  link.download = `Story-TKB-${fs(dateToExport).replace(/\//g,'-')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+};
+
+function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath(); ctx.moveTo(x + radius, y); ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius); ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height); ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius); ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y); ctx.closePath();
+}
