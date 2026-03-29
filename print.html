@@ -114,12 +114,12 @@
   async function loadData() {
     let subjects = [];
     try {
-      const cust = localStorage.getItem('custom-schedule');
-      if (cust) {
-        subjects = JSON.parse(cust);
+      const temp = localStorage.getItem('temp-print-data');
+      if (temp) {
+        subjects = JSON.parse(temp);
       } else {
-        const res = await fetch('./data/schedule.json');
-        subjects = await res.json();
+        document.getElementById('tableContainer').innerHTML = "<p>Lỗi: Không tìm thấy dữ liệu. Hãy ấn nút in từ Lịch Học chính.</p>";
+        return;
       }
       renderWeeklyTable(subjects);
     } catch (e) {
